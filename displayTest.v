@@ -54,9 +54,9 @@ module displayTest(
 // ==================================================================================
 // Instantiate your display interface here.  Connect dispVal as value to be displayed.
    DisplayInterface disp1 (
-				.clock(clk5), 			// 5 MHz clock signal
+				.clock5(clk5), 			// 5 MHz clock signal
 				.reset(reset), 		// reset signal, active high
-				.value(dispVal),     // input value to be displayed
+				.dispVal(dispVal),     // input value to be displayed
 				.digit(digit),  		// digit outputs
 				.segment(segment));  // segment outputs
 
