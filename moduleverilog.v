@@ -31,35 +31,71 @@
 */
 
 
-//DisplayInterface disp1()
+module DisplayInterface(input clk5,
+												input reset,
+												input [15:0] dispVal,
+												output reg [7:0] digit,
+												output reg [7:0] segment
+												);
 
-module clockDivide(input clk5,
-                  input reset,
-                  output reg newClock
-                  );
-
-
-          localparam  compare = 624; //Want to output on 624th clock cycle = 4kHz
+					localparam  compare = 624; //Want to output on 624th clock cycle = 4kHz
           reg [9:0] countCD;
+					reg [1:0] counterDisplay;
+					reg Enable;
+					reg [3:0] hexOutput;
+					assign segment[0] = 1'b1;
 
           always @(posedge clk5)
           	begin
-          		if(reset)
-              	countCD <= 10'b0;
-                    else if (countCD == compare) //Once it hits 624, set back to zero to count again
-                              countCD <= 10'b0;
-                    else
-                              countCD <= countCD++;
+          			if(reset)
+              		countCD <= 10'b0;
+                else if (countCD == compare) //Once it hits 624, set back to zero to count again
+                  countCD <= 10'b0;
+                else
+                  countCD <= countCD++;
           end
 
           always @(posedge clk5)
           begin
                     if(reset)
-                              newClock <= 1'b0;
+                              Enable <= 1'b0;
                     else if(countCD == compare) //Inverts the output from the last 624th clock cycle
-                              newClock <= ~newClock;
+                              Enable <= ~Enable;
                     else //Else havent hit the 624th edge yet, so hold value
-                              newClock <= newClock;
+                              Enable <= Enable;
           end
+
+					//Now to the actually displaying the values to the screen
+					//2 bit counter for controlling input to MUX
+					always @(posedge clk5, Enable)
+						begin
+							if(reset)
+								counterDisplay <= 1'b0;
+							else if(Enable)
+								counterDisplay <= counterDisplay++;
+							else
+								counterDisplay <= counterDisplay;
+						end
+
+					//Segment MUX
+					always @(counterDisplay)
+						case(counterDisplay)
+							2'b00: hexOutput = dispVal[3:0]
+							2'b01: hexOutput = dispVal[7:4]
+							2'b10: hexOutput = dispVal[11:8]
+							2'b11: hexOutput = dispVal[15:12]
+						endcase
+					//Digit Display MUX
+					always @(counterDisplay)
+						case(counterDisplay)
+							2'b00: 4'b0001;
+							2'b01: 4'b0010;
+							2'b10: 4'b0100;
+							2'b11: 4'b1000;
+						endcase
+
+					hex2seg seg1 (.number (hexOutput),           // 4-bit number
+												.pattern (segment)
+												);
 
 endmodule

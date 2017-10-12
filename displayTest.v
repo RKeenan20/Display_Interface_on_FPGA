@@ -44,10 +44,10 @@ module displayTest(
 // Use selected bits from the counter to build the value to be displayed, using
 // overlapping groups of bits from the counter for each hexadecimal digit.
 // This allows each digit to change at a different rate, slow enough to be checked easily,
-// but fast enough to cycle through all 16 symbols in a reasonable time.  
+// but fast enough to cycle through all 16 symbols in a reasonable time.
    assign dispVal[15:12] = testCount[28:25]; // left digit changes every 6.7 s (approx)
    assign dispVal[11:8]  = testCount[27:24]; // changes every 3.4 s (approx)
-   assign dispVal[7:4]   = testCount[26:23];	// changes every 1.7 s (approx)
+   assign dispVal[7:4]   = testCount[26:23];  // changes every 1.7 s (approx)
    assign dispVal[3:0]   = testCount[25:22]; // right digit changes every 0.84 s (approx)
 
 
@@ -59,5 +59,5 @@ module displayTest(
 				.value(dispVal),     // input value to be displayed
 				.digit(digit),  		// digit outputs
 				.segment(segment));  // segment outputs
-     
+
 endmodule
