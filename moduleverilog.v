@@ -81,10 +81,10 @@ module DisplayInterface(input clock5,
 					//Segment MUX
 					always @(counterDisplay)
 						case(counterDisplay)
-							2'b00: hexOutput = dispVal[3:0]
-							2'b01: hexOutput = dispVal[7:4]
-							2'b10: hexOutput = dispVal[11:8]
-							2'b11: hexOutput = dispVal[15:12]
+							2'b00: hexOutput = dispVal[3:0];
+							2'b01: hexOutput = dispVal[7:4];
+							2'b10: hexOutput = dispVal[11:8];
+							2'b11: hexOutput = dispVal[15:12];
 						endcase
 					//Digit Display MUX
 					always @(counterDisplay)
