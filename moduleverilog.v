@@ -31,7 +31,7 @@
 */
 
 
-module DisplayInterface(input clock5,
+module DisplayInterface(input clk5,
 												input reset,
 												input [15:0] dispVal,
 												output reg [7:0] digit,
