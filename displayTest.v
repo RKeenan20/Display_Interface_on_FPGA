@@ -12,6 +12,7 @@
 module displayTest(
         input clk100,        // 100 MHz clock from oscillator on board
         input rstPBn,        // reset signal, active low, from CPU RESET pushbutton
+        input [3:0] point,
         output [7:0] digit,  // digit controls - active low (7 on left, 0 on right)
         output [7:0] segment // segment controls - active low (a b c d e f g dp)
         );
@@ -55,7 +56,8 @@ module displayTest(
 // Instantiate your display interface here.  Connect dispVal as value to be displayed.
    DisplayInterface disp1 (
 				.clk5(clk5), 			// 5 MHz clock signal
-				.reset(reset), 		// reset signal, active high
+				.reset(reset),		// reset signal, active high
+            .point(point),
 				.dispVal(dispVal),     // input value to be displayed
 				.digit(digit),  		// digit outputs
 				.segment(segment));  // segment outputs

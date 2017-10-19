@@ -33,18 +33,19 @@
 
 module DisplayInterface(input clk5,
 												input reset,
+												input [3:0] point,
 												input [15:0] dispVal,
 												output reg [7:0] digit,
 												output [7:0] segment
 												);
 
 					localparam  compare = 5; //Want to output on 624th clock cycle = 4kHz
-                    reg [10:0] countCD;
+          reg [10:0] countCD;
 					reg [1:0] counterDisplay;
 					reg Enable;
 					reg [3:0] hexOutput;
 
-					assign segment[0] = 1'b0;
+					//assign segment[0] = 1'b0;
 
           always @(posedge clk5)
           	begin
@@ -83,7 +84,7 @@ module DisplayInterface(input clk5,
 					//Segment MUX
 					always @(counterDisplay, dispVal)
 						case(counterDisplay)
-							2'b00: hexOutput [3:0] = dispVal[3:0];
+							2'b00: hexOutput = dispVal[3:0];
 							2'b01: hexOutput = dispVal[7:4];
 							2'b10: hexOutput = dispVal[11:8];
 							2'b11: hexOutput = dispVal[15:12];
@@ -103,6 +104,34 @@ module DisplayInterface(input clk5,
 							2'b11: digit = 8'b11110111;
 						endcase
 
+						always @(point)
+							begin
+								case(point)
+									4'b0001:begin
+														if(digit==8'b11111110)
+															segment[0]= 1'b0;
+														else
+															segment[0] = 1'b1;
+									4'b0010:begin
+														if(digit==8'b11111101)
+															segment[0]= 1'b0;
+														else
+															segment[0] = 1'b1;
+									4'b0100:begin
+														if(digit==8'b11111011)
+															segment[0]= 1'b0;
+														else
+															segment[0] = 1'b1;
+													end
+									4'b1000:begin
+														if(digit==8'b11110111)
+															segment[0]= 1'b0;
+														else
+															segment[0] = 1'b1;
+													end
+									default: segment[0] = 1'b1;
+								endcase
+							end
 
 
 
