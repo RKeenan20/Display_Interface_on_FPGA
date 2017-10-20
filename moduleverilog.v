@@ -39,23 +39,24 @@ module DisplayInterface(input clk5,
 												output [7:0] segment
 												);
 
-					localparam  compare = 5; //Want to output on 624th clock cycle = 4kHz
-          reg [10:0] countCD;
+					localparam  compare = 624; //Want to output on 624th clock cycle = 4kHz
+          reg [10:0] countClkDiv;
 					reg [1:0] counterDisplay;
 					reg Enable;
 					reg [3:0] hexOutput;
+					reg pointOn;
 
 					//assign segment[0] = 1'b0;
 
           always @(posedge clk5)
           	begin
           			if(reset)
-              		countCD <= 11'b0;
-                else if (countCD == compare) //Once it hits 624, set back to zero to count again
-                  countCD <= 11'b0;
+              		countClkDiv <= 11'b0;
+                else if (countClkDiv == compare) //Once it hits 624, set back to zero to count again
+                  countClkDiv <= 11'b0;
 
                 else
-                  countCD <= countCD + 1'b1;
+                  countClkDiv <= countClkDiv + 1'b1;
 
           	end
 
@@ -63,7 +64,7 @@ module DisplayInterface(input clk5,
           	begin
                 if(reset)
                 	Enable <= 1'b0;
-                else if(countCD == compare) //Inverts the output from the last 624th clock cycle
+                else if(countClkDiv == compare) //Inverts the output from the last 624th clock cycle
                 	Enable <= 1'b1;
                 else //Else havent hit the 624th edge yet, so hold value
                     Enable <= 1'b0;
@@ -90,49 +91,43 @@ module DisplayInterface(input clk5,
 							2'b11: hexOutput = dispVal[15:12];
 						endcase
 
-
-						hex2seg seg1 (.number (hexOutput[3:0]),           // 4-bit number
-                          .pattern (segment[7:1])
-                          );
-
 					//Digit Display MUX
-					always @(counterDisplay)
+					always @(counterDisplay,point)
 						case(counterDisplay)
-							2'b00: digit = 8'b11111110;
-							2'b01: digit = 8'b11111101;
-							2'b10: digit = 8'b11111011;
-							2'b11: digit = 8'b11110111;
+							2'b00: begin
+											digit = 8'b11111110;
+											if(point[0] == 1'b1)
+												pointOn = 1'b1;
+											else
+												pointOn = 1'b0;
+										 end
+							2'b01: begin
+											digit = 8'b11111101;
+											if(point[1] == 1'b1)
+												pointOn = 1'b1;
+											else
+												pointOn = 1'b0;
+										 end
+							2'b10: begin
+											digit = 8'b11111011;
+											if(point[2] == 1'b1)
+												pointOn = 1'b1;
+											else
+												pointOn = 1'b0;
+										 end
+							2'b11: begin
+											digit = 8'b11110111;
+											if(point[3] == 1'b1)
+												pointOn = 1'b1;
+											else
+												pointOn = 1'b0;
+										end
 						endcase
 
-						always @(point)
-							begin
-								case(point)
-									4'b0001:begin
-														if(digit==8'b11111110)
-															segment[0]= 1'b0;
-														else
-															segment[0] = 1'b1;
-									4'b0010:begin
-														if(digit==8'b11111101)
-															segment[0]= 1'b0;
-														else
-															segment[0] = 1'b1;
-									4'b0100:begin
-														if(digit==8'b11111011)
-															segment[0]= 1'b0;
-														else
-															segment[0] = 1'b1;
-													end
-									4'b1000:begin
-														if(digit==8'b11110111)
-															segment[0]= 1'b0;
-														else
-															segment[0] = 1'b1;
-													end
-									default: segment[0] = 1'b1;
-								endcase
-							end
+						assign segment[0] = ~pointOn;
 
-
+						hex2seg seg1 (.number(hexOutput[3:0]),           // 4-bit number
+													.pattern (segment[7:1])
+													);
 
 endmodule
