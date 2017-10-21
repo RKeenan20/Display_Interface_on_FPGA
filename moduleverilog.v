@@ -31,44 +31,34 @@
 */
 
 
-module DisplayInterface(input clk5,
-												input reset,
-												input [3:0] point,
-												input [15:0] dispVal,
-												output reg [7:0] digit,
-												output [7:0] segment
+module DisplayInterface(input clk5,								//5MHz clock
+												input reset,							//Synchronous Reset
+												input [3:0] point,				//Point Marker Controller
+												input [15:0] dispVal,			//Display Value to display
+												output reg [7:0] digit,		//Controls the 8 separate digits on the display
+												output [7:0] segment			//Controls each individual segment on one digit
 												);
 
-					localparam  compare = 624; //Want to output on 624th clock cycle = 4kHz
-          reg [10:0] countClkDiv;
-					reg [1:0] counterDisplay;
-					reg Enable;
-					reg [3:0] hexOutput;
-					reg pointOn;
+					localparam  compare = 1023; 						//Want to output on 1023rd clock cycle = 4.88kHz
+          reg [10:0] countClkDiv;									//This is the Counter for our clock divider
+					reg [1:0] counterDisplay;								//The 2 bit counter that cycles the 4 digits
+					reg Enable;															//Enable input to 2 bit counter upon 624th edge
+					reg [3:0] hexOutput;										//Output from segment MUX
+					reg pointOn;														//Flag Variable for the Point Markers
 
-					//assign segment[0] = 1'b0;
-
+					//Clock Divider Counter/11 bit
           always @(posedge clk5)
           	begin
           			if(reset)
               		countClkDiv <= 11'b0;
-                else if (countClkDiv == compare) //Once it hits 624, set back to zero to count again
+									Enable <= 1'b0;
+                else if (countClkDiv == compare) //Once it hits 1249, set back to zero to count again
                   countClkDiv <= 11'b0;
-
-                else
-                  countClkDiv <= countClkDiv + 1'b1;
-
-          	end
-
-          always @(posedge clk5)
-          	begin
-                if(reset)
-                	Enable <= 1'b0;
-                else if(countClkDiv == compare) //Inverts the output from the last 624th clock cycle
-                	Enable <= 1'b1;
-                else //Else havent hit the 624th edge yet, so hold value
-                    Enable <= 1'b0;
-          	end
+									Enable <= 1'b1;									//Enable set high so our 2 bit counter can count
+								else
+                  countClkDiv <= countClkDiv + 1'b1;	//Else keep counting up by 1 with Enable off
+									Enable <= 1'b0;
+						end
 
 					//Now to actually displaying the values to the screen
 					//2 bit counter for controlling input to MUXs
@@ -77,16 +67,16 @@ module DisplayInterface(input clk5,
 							if(reset)
 								counterDisplay <= 1'b0;
 							else if(Enable)
-								counterDisplay <= counterDisplay + 1'b1;
+								counterDisplay <= counterDisplay + 1'b1;		//If Enable is 1, increment by 1
 							else
-								counterDisplay <= counterDisplay;
+								counterDisplay <= counterDisplay;						//Else hold Value
 						end
 
 					//Segment MUX
 					always @(counterDisplay, dispVal)
 						case(counterDisplay)
-							2'b00: hexOutput = dispVal[3:0];
-							2'b01: hexOutput = dispVal[7:4];
+							2'b00: hexOutput = dispVal[3:0];							//Set Hexoutput to 4bits of dispVal
+							2'b01: hexOutput = dispVal[7:4];							//These 4 bits will be process by hex2seg
 							2'b10: hexOutput = dispVal[11:8];
 							2'b11: hexOutput = dispVal[15:12];
 						endcase
@@ -95,9 +85,9 @@ module DisplayInterface(input clk5,
 					always @(counterDisplay,point)
 						case(counterDisplay)
 							2'b00: begin
-											digit = 8'b11111110;
-											if(point[0] == 1'b1)
-												pointOn = 1'b1;
+											digit = 8'b11111110;									//On the first digit on the right
+											if(point[0] == 1'b1)									//If user has selected for first point marker to be on
+												pointOn = 1'b1;											//Set pointOn = 1, else =0
 											else
 												pointOn = 1'b0;
 										 end
@@ -124,9 +114,10 @@ module DisplayInterface(input clk5,
 										end
 						endcase
 
-						assign segment[0] = ~pointOn;
+						assign segment[0] = ~pointOn;									//Assign point marker value - Active Low
 
-						hex2seg seg1 (.number(hexOutput[3:0]),           // 4-bit number
+						//Instantiation of hex2seg for 4 bits of hexOutput and left 7 bits of segment
+						hex2seg seg1 (.number(hexOutput),          
 													.pattern (segment[7:1])
 													);
 
