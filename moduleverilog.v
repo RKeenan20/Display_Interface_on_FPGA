@@ -39,10 +39,10 @@ module DisplayInterface(input clk5,								//5MHz clock
 												output [7:0] segment			//Controls each individual segment on one digit
 												);
 
-					localparam  compare = 1023; 						//Want to output on 1023rd clock cycle = 4.88kHz
-          reg [9:0] countClkDiv;									//This is the Counter for our clock divider
+					localparam  compare = 2047; 						//Want to output on 2047th clock cycle = 2.4kHz
+          reg [10:0] countClkDiv;									//This is the Counter for our clock divider
 					reg [1:0] counterDisplay;								//The 2 bit counter that cycles the 4 digits
-					reg Enable;															//Enable input to 2 bit counter upon 1023rd edge
+					reg Enable;															//Enable input to 2 bit counter upon 2047th edge
 					reg [3:0] hexOutput;										//Output from segment MUX
 					reg pointOn;														//Flag Variable for the Point Markers
 
@@ -50,10 +50,10 @@ module DisplayInterface(input clk5,								//5MHz clock
           always @(posedge clk5)
           	begin
           			if(reset)
-              		countClkDiv <= 10'b0;
+              		countClkDiv <= 11'b0;
 									Enable <= 1'b0;
-                else if (countClkDiv == compare) //Once it hits 1023, set back to zero to count again
-                  countClkDiv <= 10'b0;
+                else if (countClkDiv == compare) //Once it hits 2047, set back to zero to count again
+                  countClkDiv <= 11'b0;
 									Enable <= 1'b1;									//Enable set high so our 2 bit counter can count
 								else
                   countClkDiv <= countClkDiv + 1'b1;	//Else keep counting up by 1 with Enable off
