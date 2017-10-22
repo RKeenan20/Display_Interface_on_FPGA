@@ -79,7 +79,7 @@ module DisplayInterface(input clk5,								//5MHz clock
 						end
 
 					//Segment MUX
-					always @(counterDisplay, dispVal)
+					always @(counterDisplay) 													//Should only change when 2 bit counter counts
 						case(counterDisplay)
 							2'b00: hexOutput = dispVal[3:0];							//Set Hexoutput to 4bits of dispVal
 							2'b01: hexOutput = dispVal[7:4];							//These 4 bits will be process by hex2seg
