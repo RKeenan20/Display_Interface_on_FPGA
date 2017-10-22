@@ -50,14 +50,20 @@ module DisplayInterface(input clk5,								//5MHz clock
           always @(posedge clk5)
           	begin
           			if(reset)
-              		countClkDiv <= 11'b0;
-									Enable <= 1'b0;
+									begin
+              			countClkDiv <= 11'b0;
+										Enable <= 1'b0;
+									end
                 else if (countClkDiv == compare) //Once it hits 2047, set back to zero to count again
-                  countClkDiv <= 11'b0;
-									Enable <= 1'b1;									//Enable set high so our 2 bit counter can count
+									begin
+										countClkDiv <= 11'b0;
+										Enable <= 1'b1;									//Enable set high so our 2 bit counter can count
+									end
 								else
-                  countClkDiv <= countClkDiv + 1'b1;	//Else keep counting up by 1 with Enable off
-									Enable <= 1'b0;
+									begin
+										countClkDiv <= countClkDiv + 1'b1;	//Else keep counting up by 1 with Enable off
+										Enable <= 1'b0;
+									end
 						end
 
 					//Now to actually displaying the values to the screen
